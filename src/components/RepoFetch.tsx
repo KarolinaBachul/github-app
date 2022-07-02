@@ -6,7 +6,7 @@ const RepoFetch: React.FC = () => {
   const navigate = useNavigate();
 
   const onFinish = ({ repositoryName }: any) => {
-    navigate(`/${repositoryName}`);
+    navigate(`/${encodeURIComponent(repositoryName)}`);
   };
 
   return (

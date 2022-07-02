@@ -1,20 +1,50 @@
-import React from 'react';
-import { Button, Form, Input, Select, AutoComplete } from 'antd';
+import React, { useState } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
+import {
+  Button,
+  Form,
+  Input,
+  Select,
+  AutoComplete,
+  Modal,
+  message,
+} from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 
 const { Option } = Select;
 
-const options = [
-  { value: 'Burns Bay Road' },
-  { value: 'Downing Street' },
-  { value: 'Wall Street' },
-];
-
 const FilterPanel: React.FC = () => {
+  const [users, setUsers] = useState<string[]>([]);
+  // let location = useLocation();
+  let { repoName } = useParams();
+
+  const options = users.map((u) => ({ value: u }));
+
+  React.useEffect(() => {
+    const fetchRepo = async () => {
+      const res = await fetch(
+        `https://api.github.com/repos/${repoName}/contributors`
+      );
+      const json = (await res.json()) as
+        | { login: string }[]
+        | { message: string };
+
+      if (Array.isArray(json)) {
+        const usersLogin = json.map((u) => {
+          return u.login;
+        });
+        setUsers(usersLogin);
+      } else {
+        message.error(json.message);
+      }
+    };
+    fetchRepo();
+  }, [repoName]);
+
   const onFinish = (values: any) => {
     console.log('Success:', values);
   };
-
+  console.log('render');
   const onFinishFailed = (errorInfo: any) => {
     console.log('Failed:', errorInfo);
   };
