@@ -1,18 +1,15 @@
 import Layout from './Layout/Layout';
 import FilterPanel from '../components/FilterPanel';
-import {
-  BrowserRouter,
-  Navigate,
-  Route,
-  Routes as ReactRoutes,
-} from 'react-router-dom';
+import { BrowserRouter, Route, Routes as ReactRoutes } from 'react-router-dom';
+import RepoFetch from '../components/RepoFetch';
 
 const Routes: React.FC = () => {
   return (
     <BrowserRouter>
       <Layout>
+        <RepoFetch />
         <ReactRoutes>
-          <Route path="/" element={<FilterPanel />} />
+          <Route path="/:repoName" element={<FilterPanel />} />
         </ReactRoutes>
       </Layout>
     </BrowserRouter>

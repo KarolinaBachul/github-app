@@ -33,18 +33,6 @@ const FilterPanel: React.FC = () => {
       >
         <div className="m-auto max-w-screen-md d-flex">
           <Form.Item
-            label="Repository name"
-            name="repository name"
-            rules={[
-              {
-                required: true,
-                message: 'Please input searched repository name!',
-              },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
             label="Searched phrase"
             name="searched phrase"
             rules={[
