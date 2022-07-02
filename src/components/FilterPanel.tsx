@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { Button, Form, Input, Select, AutoComplete, message } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
+import SearchResultTable from './SearchResultTable';
 
 const { Option } = Select;
 
 const FilterPanel: React.FC = () => {
   const [users, setUsers] = useState<string[]>([]);
+  const [searchCodeResult, setSearchCodeResult] = useState();
   let [searchParams, setSearchParams] = useSearchParams();
   let { repoName } = useParams();
 
@@ -56,49 +58,52 @@ const FilterPanel: React.FC = () => {
   };
 
   return (
-    <div className="w-4/5 justify-center content-center m-auto">
-      <Form
-        name="search"
-        initialValues={{ remember: true }}
-        onFinish={onFinish}
-        onFinishFailed={onFinishFailed}
-        autoComplete="off"
-        layout="vertical"
-      >
-        <div className="m-auto max-w-screen-md d-flex">
-          <Form.Item
-            label="Searched phrase"
-            name="searchedPhrase"
-            rules={[
-              { required: true, message: 'Please input searched phrase!' },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item name="user" label="Select a user">
-            <AutoComplete options={options} />
-          </Form.Item>
-          <Form.Item name="language" label="Select a programming language">
-            <Select>
-              <Option value="go">Go</Option>
-              <Option value="java">Java</Option>
-              <Option value="js">JavaScript</Option>
-              <Option value="tsx">TypeScript JSX</Option>
-            </Select>
-          </Form.Item>
-          <div className="flex justify-end">
-            <Button
-              type="primary"
-              style={{ color: 'black' }}
-              htmlType="submit"
-              icon={<SearchOutlined />}
+    <React.Fragment>
+      <div className="w-4/5 justify-center content-center m-auto">
+        <Form
+          name="search"
+          initialValues={{ remember: true }}
+          onFinish={onFinish}
+          onFinishFailed={onFinishFailed}
+          autoComplete="off"
+          layout="vertical"
+        >
+          <div className="m-auto max-w-screen-md d-flex">
+            <Form.Item
+              label="Searched phrase"
+              name="searchedPhrase"
+              rules={[
+                { required: true, message: 'Please input searched phrase!' },
+              ]}
             >
-              Search in repository
-            </Button>
+              <Input />
+            </Form.Item>
+            <Form.Item name="user" label="Select a user">
+              <AutoComplete options={options} />
+            </Form.Item>
+            <Form.Item name="language" label="Select a programming language">
+              <Select>
+                <Option value="go">Go</Option>
+                <Option value="java">Java</Option>
+                <Option value="js">JavaScript</Option>
+                <Option value="tsx">TypeScript JSX</Option>
+              </Select>
+            </Form.Item>
+            <div className="flex justify-end">
+              <Button
+                type="primary"
+                style={{ color: 'black' }}
+                htmlType="submit"
+                icon={<SearchOutlined />}
+              >
+                Search in repository
+              </Button>
+            </div>
           </div>
-        </div>
-      </Form>
-    </div>
+        </Form>
+      </div>
+      <SearchResultTable />
+    </React.Fragment>
   );
 };
 
