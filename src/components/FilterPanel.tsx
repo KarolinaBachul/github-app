@@ -1,21 +1,13 @@
 import React, { useState } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
-import {
-  Button,
-  Form,
-  Input,
-  Select,
-  AutoComplete,
-  Modal,
-  message,
-} from 'antd';
+import { useParams, useSearchParams } from 'react-router-dom';
+import { Button, Form, Input, Select, AutoComplete, message } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 
 const { Option } = Select;
 
 const FilterPanel: React.FC = () => {
   const [users, setUsers] = useState<string[]>([]);
-  // let location = useLocation();
+  let [searchParams, setSearchParams] = useSearchParams();
   let { repoName } = useParams();
 
   const options = users.map((u) => ({ value: u }));
@@ -41,9 +33,23 @@ const FilterPanel: React.FC = () => {
     fetchRepo();
   }, [repoName]);
 
+  React.useEffect(() => {
+    const searchInRepo = async () => {
+      const res = await fetch(
+        //@ts-ignore
+        `https://api.github.com/search/code?${decodeURIComponent(searchParams)}`
+      );
+      const json = await res.json();
+      console.log(json);
+    };
+    searchInRepo();
+  }, [searchParams]);
+
   const onFinish = (values: any) => {
-    console.log('Success:', values);
+    const query = `q=${values.searchedPhrase}+language:${values.language}+user:${values.user}+repo:${repoName}`;
+    setSearchParams(query);
   };
+
   console.log('render');
   const onFinishFailed = (errorInfo: any) => {
     console.log('Failed:', errorInfo);
@@ -53,8 +59,6 @@ const FilterPanel: React.FC = () => {
     <div className="w-4/5 justify-center content-center m-auto">
       <Form
         name="search"
-        // labelCol={{ span: 8 }}
-        // wrapperCol={{ span: 16 }}
         initialValues={{ remember: true }}
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
@@ -64,28 +68,22 @@ const FilterPanel: React.FC = () => {
         <div className="m-auto max-w-screen-md d-flex">
           <Form.Item
             label="Searched phrase"
-            name="searched phrase"
+            name="searchedPhrase"
             rules={[
               { required: true, message: 'Please input searched phrase!' },
             ]}
           >
             <Input />
           </Form.Item>
-          <Form.Item label="Select a user">
-            <AutoComplete
-              options={options}
-              filterOption={(inputValue, option) =>
-                option!.value
-                  .toUpperCase()
-                  .indexOf(inputValue.toUpperCase()) !== -1
-              }
-            />
+          <Form.Item name="user" label="Select a user">
+            <AutoComplete options={options} />
           </Form.Item>
-          <Form.Item label="Select a programming language">
+          <Form.Item name="language" label="Select a programming language">
             <Select>
               <Option value="go">Go</Option>
               <Option value="java">Java</Option>
-              <Option value="javascript">JavaScript</Option>
+              <Option value="js">JavaScript</Option>
+              <Option value="tsx">TypeScript JSX</Option>
             </Select>
           </Form.Item>
           <div className="flex justify-end">
