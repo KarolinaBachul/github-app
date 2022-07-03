@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
+
 import { Button, Form, Input, Select, AutoComplete, message } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import SearchResultTable from './SearchResultTable';
@@ -40,9 +41,16 @@ const FilterPanel: React.FC = () => {
 
   React.useEffect(() => {
     const searchInRepo = async () => {
+      let query = `q=${searchParams.get('q')}+repo:${repoName}`;
+      if (searchParams.has('language')) {
+        query += `+language:${searchParams.get('language')}`;
+      }
+      if (searchParams.has('user')) {
+        query += `+user:${searchParams.get('user')}`;
+      }
+
       const res = await fetch(
-        //@ts-ignore
-        `https://api.github.com/search/code?${decodeURIComponent(searchParams)}`
+        `https://api.github.com/search/code?${decodeURIComponent(query)}`
       );
       const json = await res.json();
       if (json.items.length) {
@@ -58,21 +66,25 @@ const FilterPanel: React.FC = () => {
         setSearchCodeResults(data);
       } else {
         message.error(json.message || 'Nothing found');
+        setSearchCodeResults(null);
       }
     };
 
     if (searchParams.toString()) {
       searchInRepo();
+    } else {
+      setSearchCodeResults(null);
+      setSearchParams('');
     }
-  }, [searchParams]);
+  }, [searchParams, repoName, setSearchParams]);
 
   const onFinish = (values: any) => {
-    let query = `q=${values.searchedPhrase}+repo:${repoName}`;
+    let query = `q=${values.searchedPhrase}`;
     if (values.language) {
-      query += `+language:${values.language}`;
+      query += `&language=${values.language}`;
     }
     if (values.user) {
-      query += `+user:${values.user}`;
+      query += `&user=${values.user}`;
     }
     setSearchParams(query);
   };
@@ -86,7 +98,12 @@ const FilterPanel: React.FC = () => {
       <div className="w-4/5 justify-center content-center m-auto">
         <Form
           name="search"
-          initialValues={{ remember: true }}
+          initialValues={{
+            remember: true,
+            searchedPhrase: searchParams.get('q') || '',
+            user: searchParams.get('user') || '',
+            language: searchParams.get('language') || '',
+          }}
           onFinish={onFinish}
           onFinishFailed={onFinishFailed}
           autoComplete="off"
@@ -100,7 +117,7 @@ const FilterPanel: React.FC = () => {
                 { required: true, message: 'Please input searched phrase!' },
               ]}
             >
-              <Input />
+              <Input allowClear />
             </Form.Item>
             <Form.Item name="user" label="Select a user">
               <AutoComplete options={options} />

@@ -1,6 +1,4 @@
-import { Table, Divider, Button, Modal, Avatar, Pagination } from 'antd';
-import type { TablePaginationConfig } from 'antd/lib/table';
-import type { PaginationProps } from 'antd';
+import { Table, Divider, Button, Modal, Avatar } from 'antd';
 import React, { useState } from 'react';
 
 export type SearchCodeResult = {
@@ -34,10 +32,13 @@ const SearchResultTable: React.FC<Props> = ({ searchCodeResults }) => {
           <Avatar size={200} style={{ marginLeft: '26%' }} src={avatarSource} />
         </Modal>
       )}
-      <div className="w-4/5 justify-center content-center m-auto mb-15">
+      <div className="w-4/5 justify-center content-center m-auto">
         <Divider />
         <Table
-          dataSource={searchCodeResults}
+          dataSource={searchCodeResults.map((scr, i) => ({
+            ...scr,
+            key: scr.ownerName + i,
+          }))}
           pagination={{
             showSizeChanger: true,
             showTotal: (total) => `Total ${total} items`,
