@@ -3,12 +3,15 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { Button, Form, Input, Select, AutoComplete, message } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import SearchResultTable from './SearchResultTable';
+import { SearchCodeResult } from './SearchResultTable';
 
 const { Option } = Select;
 
 const FilterPanel: React.FC = () => {
   const [users, setUsers] = useState<string[]>([]);
-  const [searchCodeResult, setSearchCodeResult] = useState();
+  const [searchCodeResults, setSearchCodeResults] = useState<
+    SearchCodeResult[] | null
+  >(null);
   let [searchParams, setSearchParams] = useSearchParams();
   let { repoName } = useParams();
 
@@ -42,17 +45,38 @@ const FilterPanel: React.FC = () => {
         `https://api.github.com/search/code?${decodeURIComponent(searchParams)}`
       );
       const json = await res.json();
-      console.log(json);
+      if (json.items.length) {
+        const data = json.items.map((r: any) => {
+          return {
+            fileName: r.name,
+            url: r.html_url,
+            description: r.description,
+            ownerName: r.repository.owner.login,
+            ownerAvatar: r.repository.owner.avatar_url,
+          };
+        });
+        setSearchCodeResults(data);
+      } else {
+        message.error(json.message || 'Nothing found');
+      }
     };
-    searchInRepo();
+
+    if (searchParams.toString()) {
+      searchInRepo();
+    }
   }, [searchParams]);
 
   const onFinish = (values: any) => {
-    const query = `q=${values.searchedPhrase}+language:${values.language}+user:${values.user}+repo:${repoName}`;
+    let query = `q=${values.searchedPhrase}+repo:${repoName}`;
+    if (values.language) {
+      query += `+language:${values.language}`;
+    }
+    if (values.user) {
+      query += `+user:${values.user}`;
+    }
     setSearchParams(query);
   };
 
-  console.log('render');
   const onFinishFailed = (errorInfo: any) => {
     console.log('Failed:', errorInfo);
   };
@@ -102,7 +126,9 @@ const FilterPanel: React.FC = () => {
           </div>
         </Form>
       </div>
-      <SearchResultTable />
+      {searchCodeResults && (
+        <SearchResultTable searchCodeResults={searchCodeResults} />
+      )}
     </React.Fragment>
   );
 };
